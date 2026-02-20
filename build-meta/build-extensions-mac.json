@@ -21,7 +21,10 @@
     "session",
     "simplexml",
     "sockets",
+    "sodium",
     "tokenizer",
     "xml",
+    "xmlreader",
+    "xmlwriter",
     "zip"
 ]
