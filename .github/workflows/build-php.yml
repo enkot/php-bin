@@ -155,18 +155,21 @@ jobs:
       - name: Download PHP library sources
         run: |
           cd ../static-php-cli
-          ./bin/${{ env.SPC_BINARY }} download --for-libs "${{ env.PHP_LIBS }}" --prefer-pre-built --debug
+          ./bin/${{ env.SPC_BINARY }} download --for-libs "${{ env.PHP_LIBS }}" --debug
           cd ../php-bin
 
-      - name: Rename pre-built zlib for Windows
-        if: matrix.os == 'windows-latest'
-        shell: bash
+      - name: Patch zlib CMakeLists for correct lib name
         run: |
           cd ../static-php-cli
-          # Rename the pre-built library if it's named z.lib
-          if [ -f "buildroot/lib/z.lib" ]; then
-            mv buildroot/lib/z.lib buildroot/lib/zlib.lib
-          fi
+          sed -i '/add_library(zlibstatic STATIC/a set_target_properties(zlibstatic PROPERTIES OUTPUT_NAME zlib)' "source/zlib/CMakeLists.txt"
+          cd ../php-bin
+
+      - name: Build PHP libraries
+        run: |
+          cd ../static-php-cli
+          for lib in $(echo "${{ env.PHP_LIBS }}" | tr ',' ' '); do
+            ./bin/${{ env.SPC_BINARY }} build-lib $lib --debug
+          done
           cd ../php-bin
 
       - name: Build PHP
