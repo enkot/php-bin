@@ -162,9 +162,7 @@ jobs:
         run: |
           cd ../static-php-cli
           ZLIB_CMAKE="source/zlib/CMakeLists.txt"
-          if [ -f "$ZLIB_CMAKE" ]; then
-            sed -i '/add_library(zlibstatic STATIC/a set_target_properties(zlibstatic PROPERTIES OUTPUT_NAME zlib)' "$ZLIB_CMAKE"
-          fi
+          sed -i '/add_library(zlibstatic STATIC/a set_target_properties(zlibstatic PROPERTIES OUTPUT_NAME zlib)' "$ZLIB_CMAKE"
           cd ../php-bin
 
       - name: Build PHP libraries
