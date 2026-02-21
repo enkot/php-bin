@@ -152,6 +152,29 @@ jobs:
           ./bin/${{ env.SPC_BINARY }} download --with-php=${{ matrix.version }} --for-extensions "${{ env.PHP_EXTENSIONS }}" --prefer-pre-built
           cd ../php-bin
 
+      - name: Download PHP library sources
+        run: |
+          cd ../static-php-cli
+          ./bin/${{ env.SPC_BINARY }} download --for-libs "${{ env.PHP_LIBS }}" --prefer-pre-built --debug
+          cd ../php-bin
+
+      - name: Build PHP libraries with zlib rename
+        run: |
+          cd ../static-php-cli
+          if echo "${{ env.PHP_LIBS }}" | grep -q "zlib"; then
+            ./bin/${{ env.SPC_BINARY }} build-lib zlib --debug
+            mv buildroot/lib/z.lib buildroot/lib/zlib.lib
+            OTHER_LIBS=$(echo "${{ env.PHP_LIBS }}" | sed 's/zlib,//g' | sed 's/,zlib//g' | sed 's/^,//g' | sed 's/,$//g')
+            for lib in $(echo "$OTHER_LIBS" | tr ',' ' '); do
+              ./bin/${{ env.SPC_BINARY }} build-lib $lib --debug
+            done
+          else
+            for lib in $(echo "${{ env.PHP_LIBS }}" | tr ',' ' '); do
+              ./bin/${{ env.SPC_BINARY }} build-lib $lib --debug
+            done
+          fi
+          cd ../php-bin
+
       - name: Build PHP
         run: |
           cd ../static-php-cli
