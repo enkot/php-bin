@@ -161,7 +161,7 @@ jobs:
       - name: Build PHP libraries with zlib rename
         run: |
           cd ../static-php-cli
-          if echo "${{ env.PHP_LIBS }}" | grep -q "zlib"; then
+          if [[ "${{ env.PHP_LIBS }}" == *zlib* ]]; then
             ./bin/${{ env.SPC_BINARY }} build-lib zlib --debug
             mv buildroot/lib/z.lib buildroot/lib/zlib.lib
             OTHER_LIBS=$(echo "${{ env.PHP_LIBS }}" | sed 's/zlib,//g' | sed 's/,zlib//g' | sed 's/^,//g' | sed 's/,$//g')
