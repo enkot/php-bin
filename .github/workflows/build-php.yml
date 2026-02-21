@@ -161,8 +161,7 @@ jobs:
       - name: Patch zlib CMakeLists for correct lib name
         run: |
           cd ../static-php-cli
-          ZLIB_CMAKE="source/zlib/CMakeLists.txt"
-          sed -i '/add_library(zlibstatic STATIC/a set_target_properties(zlibstatic PROPERTIES OUTPUT_NAME zlib)' "$ZLIB_CMAKE"
+          sed -i '/add_library(zlibstatic STATIC/a set_target_properties(zlibstatic PROPERTIES OUTPUT_NAME zlib)' "source/zlib/CMakeLists.txt"
           cd ../php-bin
 
       - name: Build PHP libraries
