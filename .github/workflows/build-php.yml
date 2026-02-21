@@ -158,21 +158,23 @@ jobs:
           ./bin/${{ env.SPC_BINARY }} download --for-libs "${{ env.PHP_LIBS }}" --prefer-pre-built --debug
           cd ../php-bin
 
-      - name: Build PHP libraries with zlib rename
+      - name: Patch zlib CMakeLists for correct lib name
         run: |
           cd ../static-php-cli
-          if [[ "${{ env.PHP_LIBS }}" == *zlib* ]]; then
-            ./bin/${{ env.SPC_BINARY }} build-lib zlib --debug
-            mv buildroot/lib/z.lib buildroot/lib/zlib.lib
-            OTHER_LIBS=$(echo "${{ env.PHP_LIBS }}" | sed 's/zlib,//g' | sed 's/,zlib//g' | sed 's/^,//g' | sed 's/,$//g')
-            for lib in $(echo "$OTHER_LIBS" | tr ',' ' '); do
-              ./bin/${{ env.SPC_BINARY }} build-lib $lib --debug
-            done
-          else
-            for lib in $(echo "${{ env.PHP_LIBS }}" | tr ',' ' '); do
-              ./bin/${{ env.SPC_BINARY }} build-lib $lib --debug
-            done
+          if echo "${{ env.PHP_LIBS }}" | grep -q "zlib"; then
+            ZLIB_CMAKE="source/zlib/CMakeLists.txt"
+            if [ -f "$ZLIB_CMAKE" ]; then
+              sed -i '/add_library(zlibstatic STATIC/a set_target_properties(zlibstatic PROPERTIES OUTPUT_NAME zlib)' "$ZLIB_CMAKE"
+            fi
           fi
+          cd ../php-bin
+
+      - name: Build PHP libraries
+        run: |
+          cd ../static-php-cli
+          for lib in $(echo "${{ env.PHP_LIBS }}" | tr ',' ' '); do
+            ./bin/${{ env.SPC_BINARY }} build-lib $lib --debug
+          done
           cd ../php-bin
 
       - name: Build PHP
